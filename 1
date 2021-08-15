@@ -1,0 +1,18 @@
+  SignatureScanner SigScanner;
+    SigScanner.SetTargetId(GetCurrentProcessId());
+    module mod = SigScanner.GetModule(L"InProcessClient64.dll");
+    cout << hex << mod.dwBase << "\n";
+    cout << mod.dwSize;
+
+    system("pause");
+    DWORD oldProtect;
+    VirtualProtect((LPVOID)mod.dwBase, mod.dwSize, PAGE_EXECUTE_READWRITE, &oldProtect);
+    system("pause");
+    char patch[] = { "\xC3" };
+    //std::vector<std::string> patch;
+
+    for (int j = 0; j < mod.dwSize; j++) {
+        if (!WriteProcessMemory(GetCurrentProcess(), (LPVOID)(mod.dwBase+j), patch, sizeof(patch), 0)) {
+            Error("Error writing");
+        }
+    }
